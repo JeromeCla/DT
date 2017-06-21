@@ -56,3 +56,11 @@ def Generate_CurveType(NumRegime, ArraySVM, ArrayET, ArrayCROV):
         CurveType = np.nan * ArraySVM[0]
     
     return CurveType
+
+def get_signal_stat(Data,VarName):
+# Return the signal of a given signal and all its corresponding statistics
+
+    sel_cols = [col for col in Data_stat.columns if VarName in col]
+    sign=pd.concat([Data[VarName],Data_stat[sel_cols]],axis=1)
+
+    return sign
