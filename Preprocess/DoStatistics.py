@@ -58,7 +58,7 @@ def DoStatistics(Data,MovingWindow):
     dt.rename(columns = dict(zip(cols, 'dt_' + cols)), inplace=True)       
     
     # Calculate Acceleration = X second derivative into X_Acc (=X_Vel first derivative)    
-    dt2 = Data.diff()
+    dt2 = dt.diff()
     cols = dt2.columns[:]
     dt2.rename(columns = dict(zip(cols, 'dt2_' + cols)), inplace=True)    
     
