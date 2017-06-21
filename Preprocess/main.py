@@ -32,11 +32,11 @@ WindowSize=150
 VarSelect= ['Gva_USA', 'MainGeom_AbsCurTot_mm',\
             'TkEd_pCM_Regle_X', 'TkEd_pCM_Regle_Y',\
             'Gva_VitParc5_Finale', 'TkEd_PI18_td', \
-            'Main_PressionMesSup', 'Main_PressionMesInf',\
+            'Main_PressionMesSup', 'Main_PressionMesInf', \
             'Stra_Etat_TableActive']
 
 #Variable NOT to plot 
-VarExclude= ['TkEd_pCM_Regle_X', 'TkEd_pCM_Regle_Y']
+VarExclude= ['TkEd_pCM_Regle_X', 'TkEd_pCM_Regle_Y','Stra_Etat_TableActive']
 
 #Echantillon and regime to analyze
 echantillon = input("Enter the echantillon : " )
@@ -60,16 +60,17 @@ for i in range (0,len(regime)):
     print('Plot results... ', end='')
     
     #Plot geometry of workpiece
-    ps.plot_positions(Data)
+    fig_geom=ps.plot_positions(Data)
     
     #Plot signals in VarSelect except signals in VarExclude 
-    ps.plot_signals(Data,VarExclude,echantillon,regime[i])
+    fig_signal=ps.plot_signals(Data,VarExclude,echantillon,regime[i])
     
     #Plot statistics of signal VarStatPlot
     sign=pt.get_signal_stat(Data,Data_stat,VarStatPlot)
-    ps.plot_statistics(sign,Data['TkEd_pCM_Regle_X'],Data['TkEd_pCM_Regle_Y'] \
+    fig_stat=ps.plot_statistics(sign,Data['TkEd_pCM_Regle_X'],Data['TkEd_pCM_Regle_Y'] \
                        ,1,filename)
-
+    if {'Stra_Etat_TableActive'}.issubset(Data.columns):
+        ps.plotStrat(Data['Stra_Etat_TableActive'],fig_signal)
 
 #==============================================================================
 # Create CSV File that can be downsampled

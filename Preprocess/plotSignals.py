@@ -6,8 +6,10 @@ Created on Tue Jun 20 17:34:30 2017
 """
 import sys
 import pandas as pd
+import numpy as np
 import statistics
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 from matplotlib import gridspec
 
 #==============================================================================
@@ -32,10 +34,12 @@ def plot_positions(Data): # POSITIONS MAP
     fig.subplots_adjust(left=0.15, bottom=0.1, top=0.90, right=0.98)
     
     plt.show()
-    return
+    return fig
 
-def plot_signals(Data,exclude,echantillon,operation):    
+def plot_signals(Data,exclude,echantillon,operation):  
+
     Data.drop(exclude,axis=1).plot(subplots=True,title='Echantillon: ' +str(echantillon)+ ' Operation: ' +str(operation)+ '')
+    return plt.gcf()
 
 def plot_statistics(Var,X,Y,DoPlotStatistics,filename): # STATISTICS CURVES
     fig = plt.figure()
@@ -133,5 +137,38 @@ def plot_statistics(Var,X,Y,DoPlotStatistics,filename): # STATISTICS CURVES
     fig.subplots_adjust(left=0.05, bottom=0.05, top=0.92, right=0.99)    
     plt.show()
     
-    return
+    return fig
 
+def plotStrat(data,fig_signal):    
+    # Plot the differentes strategies
+    
+    strat_intern = data[(data/10000).apply(np.fix)==7].index.values
+    strat_extern = data[(data/10000).apply(np.fix)==8].index.values
+    strat_ebauche = data[(data/10000).apply(np.fix)==5].index.values                  
+    strat_arrete_axe = data[(data/10000).apply(np.fix)==6].index.values
+    
+    bound_intern=np.split(strat_intern, np.where(np.diff(strat_intern) != 1)[0]+1)
+    bound_extern=np.split(strat_extern, np.where(np.diff(strat_extern) != 1)[0]+1)
+    bound_ebauche=np.split(strat_ebauche, np.where(np.diff(strat_ebauche) != 1)[0]+1)
+    bound_arrete_axe=np.split(strat_arrete_axe, np.where(np.diff(strat_arrete_axe) != 1)[0]+1)
+        
+    for i in range (0,len(fig_signal.get_axes())):  
+        if len(bound_intern)>1 :
+            for m in range (0,len(bound_intern)):
+                fig_signal.get_axes()[i].axvspan(min(bound_intern[m]),max(bound_intern[m]), alpha=0.5, color='red',clip_on=False,label='angle intern') 
+        if len(bound_extern)>1 :        
+            for n in range (0,len(bound_extern)):
+                fig_signal.get_axes()[i].axvspan(min(bound_extern[n]),max(bound_extern[n]), alpha=0.5, color='blue',clip_on=False)                 
+        if len(bound_ebauche)>1 :
+            for o in range (0,len(bound_ebauche)):
+                fig_signal.get_axes()[i].axvspan(min(bound_ebauche[o]),max(bound_ebauche[o]), alpha=0.5, color='green',clip_on=False)
+        if len(bound_arrete_axe)>1 :
+            for p in range (0,len(bound_arrete_axe)):
+                fig_signal.get_axes()[i].axvspan(min(bound_arrete_axe[p]),max(bound_arrete_axe[p]), alpha=0.5, color='cyan',clip_on=False)   
+    
+    #Legend
+    red_patch = mpatches.Patch(color='red', label='intern')
+    blue_patch = mpatches.Patch(color='blue', label='extern')
+    green_patch = mpatches.Patch(color='green', label='ebauche')
+    cyan_patch = mpatches.Patch(color='cyan', label='arret axe')
+    fig_signal.legend(handles=[red_patch,blue_patch,green_patch,cyan_patch], labels=('intern','extern','ebauche','arret axe',))        
