@@ -111,7 +111,6 @@ def plot_statistics(Var,X,Y,DoPlotStatistics,filename): # STATISTICS CURVES
     ax5.set_title('Axis Position')
     ax5.set_xlabel(XPos_name + ' [' + Pos_units + ']')
     ax5.set_ylabel(YPos_name + ' [' + Pos_units + ']')
-    ax5.set_aspect('equal')
     
     head_width_set = (((max(X)-min(X))/20)\
                       +((max(Y)-min(Y))/20))/2

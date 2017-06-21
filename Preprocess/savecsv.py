@@ -49,7 +49,7 @@ def loadcsv(datadir,filename,VarSelect):
         csvdata = pd.read_csv(csvfile, sep=';', dtype=str, usecols=VarSelect)
 
     print('Done !')
-    return csvdata 
+    return csvdata.apply(pd.to_numeric) 
 
 def createcsv(Dir_input,Dir_Output):
 #    Dir_input = "../0 - Raw Data/"

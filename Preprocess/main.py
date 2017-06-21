@@ -14,49 +14,63 @@ import savecsv as sc
 import DoStatistics as ds
 import plotSignals as ps
 import posttreatment as pt
+
+plt.close("all")
+
 #==============================================================================
 # LOAD FILES 
 #==============================================================================
 
-echantillon= 6
-operation = 3
 
-datadir = 'C:\\Users\\i0A103166\\Documents\\Python\\MachineLearning\\Usinage6' # 
-filename = '\\usinage_006_regime_003.csv'
 
 DoReloadFile = True
 DoPlotStatistics = True
-VarStatPlot = 'Gva_VitParc5_Finale'
 
+#Variable to get the statistics on and window size
+VarStatPlot = 'Gva_VitParc5_Finale'
+WindowSize=150
+
+#Variable to load from file
 VarSelect= ['Gva_USA', 'MainGeom_AbsCurTot_mm',\
             'TkEd_pCM_Regle_X', 'TkEd_pCM_Regle_Y',\
             'Gva_VitParc5_Finale', 'TkEd_PI18_td', \
             'Main_PressionMesSup', 'Main_PressionMesInf',\
             'Stra_Etat_TableActive']
 
+#Variable NOT to plot 
 VarExclude= ['TkEd_pCM_Regle_X', 'TkEd_pCM_Regle_Y']
 
-if DoReloadFile:
-    Data = sc.loadcsv(datadir,filename,VarSelect)
-    Data=Data.apply(pd.to_numeric)
+#Echantillon and regime to analyze
+echantillon = input("Enter the echantillon : " )
+regime = str(input("Enter the regime : " ))
+
+#Loop to load and plot the regime asked by the user
+for i in range (0,len(regime)):
+    datadir = 'C:\\Users\\i0A103166\\Documents\\Python\\MachineLearning\\Usinage' +echantillon # 
+    filename = '\\usinage_0' +('0' + echantillon if int(echantillon) < 10 else echantillon)+ '_regime_00' +regime[i]+ '.csv'
+                                                                                    
+    if DoReloadFile:
+        Data = sc.loadcsv(datadir,filename,VarSelect)
+        
+    if DoPlotStatistics:
+        Data_stat= ds.DoStatistics(Data,WindowSize)
     
-if DoPlotStatistics:
-    Data_stat= ds.DoStatistics(Data,50)
-
-#==============================================================================
-# EXECUTION : Plot results
-#==============================================================================
-
-print('Plot results... ', end='')
-
-ps.plot_positions(Data)
-ps.plot_signals(Data,VarExclude,echantillon,operation)
-
-sign=pt.get_signal_stat(Data,)
-ps.plot_statistics(sign,Data['TkEd_pCM_Regle_X'],Data['TkEd_pCM_Regle_Y'] \
-                   ,1,filename)
-
-#print('Done !')
+    #==============================================================================
+    # EXECUTION : Plot results
+    #==============================================================================
+    
+    print('Plot results... ', end='')
+    
+    #Plot geometry of workpiece
+    ps.plot_positions(Data)
+    
+    #Plot signals in VarSelect except signals in VarExclude 
+    ps.plot_signals(Data,VarExclude,echantillon,regime[i])
+    
+    #Plot statistics of signal VarStatPlot
+    sign=pt.get_signal_stat(Data,Data_stat,VarStatPlot)
+    ps.plot_statistics(sign,Data['TkEd_pCM_Regle_X'],Data['TkEd_pCM_Regle_Y'] \
+                       ,1,filename)
 
 
 #==============================================================================

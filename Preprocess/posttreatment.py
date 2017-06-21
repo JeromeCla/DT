@@ -5,6 +5,7 @@ Created on Wed Jun 14 15:45:23 2017
 @author: i0A103166
 """
 import numpy as np 
+import pandas as pd
 
 def defineOperation(Regime):
     # Regime 1 = MUT == 3 AND MUS == 7
@@ -57,7 +58,7 @@ def Generate_CurveType(NumRegime, ArraySVM, ArrayET, ArrayCROV):
     
     return CurveType
 
-def get_signal_stat(Data,VarName):
+def get_signal_stat(Data,Data_stat,VarName):
 # Return the signal of a given signal and all its corresponding statistics
 
     sel_cols = [col for col in Data_stat.columns if VarName in col]
