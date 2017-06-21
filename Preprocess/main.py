@@ -21,13 +21,11 @@ plt.close("all")
 # LOAD FILES 
 #==============================================================================
 
-
-
 DoReloadFile = True
 DoPlotStatistics = True
 
 #Variable to get the statistics on and window size
-VarStatPlot = 'Gva_VitParc5_Finale'
+VarStatPlot = 'MainGeom_AbsCurTot_mm'
 WindowSize=150
 
 #Variable to load from file
