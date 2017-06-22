@@ -14,6 +14,7 @@ import pandas as pd
 import statistics
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
+import CurvAbsTransform as cat
 #==============================================================================
 # Initializations
 #==============================================================================
@@ -58,7 +59,7 @@ def DoStatistics(Data,MovingWindow):
     dt.rename(columns = dict(zip(cols, 'dt_' + cols)), inplace=True)       
     
     # Calculate Acceleration = X second derivative into X_Acc (=X_Vel first derivative)    
-    dt2 = dt.diff()
+    dt2 = (Data.diff()).diff()
     cols = dt2.columns[:]
     dt2.rename(columns = dict(zip(cols, 'dt2_' + cols)), inplace=True)    
     
@@ -87,7 +88,9 @@ def DoStatistics(Data,MovingWindow):
     cols = max_data.columns[:]
     max_data.rename(columns = dict(zip(cols, 'max_' + cols)), inplace=True)  
     
-    Data_stat = pd.concat([dt,dt2,med,stand_dev,variance,min_data,max_data],axis=1)
+
+    
+    Data_stat = pd.concat([dt,dt2,med,stand_dev,variance,min_data,max_data ],axis=1)
     
     print('Done !')
     

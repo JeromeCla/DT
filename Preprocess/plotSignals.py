@@ -37,11 +37,11 @@ def plot_positions(Data): # POSITIONS MAP
     return fig
 
 def plot_signals(Data,exclude,echantillon,operation):  
-
-    Data.drop(exclude,axis=1).plot(subplots=True,title='Echantillon: ' +str(echantillon)+ ' Operation: ' +str(operation)+ '')
+    X= Data['MainGeom_AbsCurTot_mm']
+    Data.drop(exclude,axis=1).plot(x=X,subplots=True,title='Echantillon: ' +str(echantillon)+ ' Operation: ' +str(operation)+ '')
     return plt.gcf()
 
-def plot_statistics(Var,X,Y,DoPlotStatistics,filename): # STATISTICS CURVES
+def plot_statistics(Var,T,X,Y,DoPlotStatistics,filename,AbscCurvRef): # STATISTICS CURVES
     fig = plt.figure()
     fig.clear()
         
@@ -51,7 +51,9 @@ def plot_statistics(Var,X,Y,DoPlotStatistics,filename): # STATISTICS CURVES
     XPos_name = 'X'
     YPos_name = 'Y'
     Pos_units = 'mm'
-    T=Var.index.values*0.004
+    if AbscCurvRef == False:
+        T=Var.index.values*0.004
+        
     fig.suptitle(filename, fontsize=20)
 #    plt.title(filename,y=1.08)
     
@@ -139,12 +141,12 @@ def plot_statistics(Var,X,Y,DoPlotStatistics,filename): # STATISTICS CURVES
     
     return fig
 
-def plotStrat(data,fig_signal):    
+def plotStrat(data,X,fig_signal):    
     # Plot the differentes strategies
     
     strat_intern = data[(data/10000).apply(np.fix)==7].index.values
     strat_extern = data[(data/10000).apply(np.fix)==8].index.values
-    strat_ebauche = data[(data/10000).apply(np.fix)==5].index.values                  
+    strat_ebauche = data[(data/10000).apply(np.fix)==5].index.values            
     strat_arrete_axe = data[(data/10000).apply(np.fix)==6].index.values
     
     bound_intern=np.split(strat_intern, np.where(np.diff(strat_intern) != 1)[0]+1)
@@ -155,16 +157,16 @@ def plotStrat(data,fig_signal):
     for i in range (0,len(fig_signal.get_axes())):  
         if len(bound_intern)>1 :
             for m in range (0,len(bound_intern)):
-                fig_signal.get_axes()[i].axvspan(min(bound_intern[m]),max(bound_intern[m]), alpha=0.5, color='red',clip_on=False,label='angle intern') 
+                fig_signal.get_axes()[i].axvspan(X[min(bound_intern[m])],X[max(bound_intern[m])], alpha=0.5, color='red',clip_on=False,label='angle intern') 
         if len(bound_extern)>1 :        
             for n in range (0,len(bound_extern)):
-                fig_signal.get_axes()[i].axvspan(min(bound_extern[n]),max(bound_extern[n]), alpha=0.5, color='blue',clip_on=False)                 
+                fig_signal.get_axes()[i].axvspan(X[min(bound_extern[n])],X[max(bound_extern[n])], alpha=0.5, color='blue',clip_on=False)                 
         if len(bound_ebauche)>1 :
             for o in range (0,len(bound_ebauche)):
-                fig_signal.get_axes()[i].axvspan(min(bound_ebauche[o]),max(bound_ebauche[o]), alpha=0.5, color='green',clip_on=False)
+                fig_signal.get_axes()[i].axvspan(X[min(bound_ebauche[o])],X[max(bound_ebauche[o])], alpha=0.5, color='green',clip_on=False)
         if len(bound_arrete_axe)>1 :
             for p in range (0,len(bound_arrete_axe)):
-                fig_signal.get_axes()[i].axvspan(min(bound_arrete_axe[p]),max(bound_arrete_axe[p]), alpha=0.5, color='cyan',clip_on=False)   
+                fig_signal.get_axes()[i].axvspan(X[min(bound_arrete_axe[p])],X[max(bound_arrete_axe[p])], alpha=0.5, color='cyan',clip_on=False)   
     
     #Legend
     red_patch = mpatches.Patch(color='red', label='intern')

@@ -14,6 +14,7 @@ import savecsv as sc
 import DoStatistics as ds
 import plotSignals as ps
 import posttreatment as pt
+import CurvAbsTransform as cat
 
 plt.close("all")
 
@@ -23,6 +24,7 @@ plt.close("all")
 
 DoReloadFile = True
 DoPlotStatistics = True
+AbscCurvRef = True
 
 #Variable to get the statistics on and window size
 VarStatPlot = 'MainGeom_AbsCurTot_mm'
@@ -35,8 +37,9 @@ VarSelect= ['Gva_USA', 'MainGeom_AbsCurTot_mm',\
             'Main_PressionMesSup', 'Main_PressionMesInf', \
             'Stra_Etat_TableActive']
 
+
 #Variable NOT to plot 
-VarExclude= ['TkEd_pCM_Regle_X', 'TkEd_pCM_Regle_Y','Stra_Etat_TableActive']
+VarExclude= ['TkEd_pCM_Regle_X', 'TkEd_pCM_Regle_Y','Stra_Etat_TableActive','MainGeom_AbsCurTot_mm']
 
 #Echantillon and regime to analyze
 echantillon = input("Enter the echantillon : " )
@@ -46,12 +49,15 @@ regime = str(input("Enter the regime : " ))
 for i in range (0,len(regime)):
     datadir = 'C:\\Users\\i0A103166\\Documents\\Python\\MachineLearning\\Usinage' +echantillon # 
     filename = '\\usinage_0' +('0' + echantillon if int(echantillon) < 10 else echantillon)+ '_regime_00' +regime[i]+ '.csv'
-                                                                                    
+                                                                                           
     if DoReloadFile:
         Data = sc.loadcsv(datadir,filename,VarSelect)
-        
+    if AbscCurvRef:
+        Data = cat.getDataAbsCurv(Data)
     if DoPlotStatistics:
         Data_stat= ds.DoStatistics(Data,WindowSize)
+        
+    
     
     #==============================================================================
     # EXECUTION : Plot results
@@ -67,10 +73,12 @@ for i in range (0,len(regime)):
     
     #Plot statistics of signal VarStatPlot
     sign=pt.get_signal_stat(Data,Data_stat,VarStatPlot)
-    fig_stat=ps.plot_statistics(sign,Data['TkEd_pCM_Regle_X'],Data['TkEd_pCM_Regle_Y'] \
-                       ,1,filename)
+    fig_stat=ps.plot_statistics(sign,Data['MainGeom_AbsCurTot_mm'],Data['TkEd_pCM_Regle_X'],Data['TkEd_pCM_Regle_Y'] \
+                       ,1,filename,AbscCurvRef)
     if {'Stra_Etat_TableActive'}.issubset(Data.columns):
-        ps.plotStrat(Data['Stra_Etat_TableActive'],fig_signal)
+        ps.plotStrat(Data['Stra_Etat_TableActive'],Data['MainGeom_AbsCurTot_mm'],fig_signal)
+
+
 
 #==============================================================================
 # Create CSV File that can be downsampled
