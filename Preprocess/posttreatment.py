@@ -28,7 +28,7 @@ def currentOperation(Regime, Index):
     return operation
 
 
-def Generate_CurveType(NumRegime, ArraySVM, ArrayET, ArrayCROV):
+def Generate_CurveType(regime,Data):
     # Generate value indicating geometric curve type:
     # 0 - Straight line
     # 1 - Internal curve
@@ -43,20 +43,26 @@ def Generate_CurveType(NumRegime, ArraySVM, ArrayET, ArrayCROV):
     # to silent warning from NumPy
     np.seterr(all="ignore")
     
-    if NumRegime == 1:
-        # internal if ArraySVM < 1 ; external if ArraySVM > 1 ; straight else
-        CurveType = np.uint(1) * np.less(ArraySVM[0],1.0) + np.uint(2) * np.greater(ArraySVM[0],1.0)
-    elif NumRegime == 2:
-        # internal if ArrayET bit 7 is 1 ; external if ArrayET bit 8 is 1 ; straight else
-        CurveType = np.uint(1) * (np.round(np.divide(ArrayET[0]))==7) + np.uint(2) * (np.round(np.divide(ArrayET[0]))==8) 
-    elif NumRegime == 3:
-         # internal if ArrayET < 1 ; external if ArrayET > 1 ; straight else
-        CurveType = np.uint(1) * np.less(ArrayCROV[0],1.0) + np.uint(2) * np.greater(ArrayCROV[0],1.0)
-    else:
-        # undefined : return NaN
-        CurveType = np.nan * ArraySVM[0]
+    strat = Data['Stra_Etat_TableActive']
+    strat_finition= Data['Stra_ModifCROV_Final']
+    CurveType = np.zeros(len(Data))
+    
+    if regime != 3:
+        CurveType[strat[(strat/10000).apply(np.fix)==7].index.values] = 7
+        CurveType[strat[(strat/10000).apply(np.fix)==8].index.values] = 8
+        CurveType[strat[(strat/10000).apply(np.fix)==5].index.values] = 5          
+        CurveType[strat[(strat/10000).apply(np.fix)==6].index.values] = 6  
+    if regime == 3:
+        CurveType[strat_finition[strat_finition<1].index.values] = 7
+        CurveType[strat_finition[strat_finition>1].index.values] = 8
     
     return CurveType
+
+def addSignals(regime,Data):
+    # We set the start time at zero
+    Data['Time'] = Data['Time']- Data['Time'][0]
+    Data['CurveType'] = Generate_CurveType(regime,Data)
+    return Data
 
 def get_signal_stat(Data,Data_stat,VarName):
 # Return the signal of a given signal and all its corresponding statistics
@@ -65,3 +71,17 @@ def get_signal_stat(Data,Data_stat,VarName):
     sign=pd.concat([Data[VarName],Data_stat[sel_cols]],axis=1)
 
     return sign
+
+def get_Variable_to_Save(filename):
+    with open(filename,'r') as fd:
+        data = np.loadtxt(fd, delimiter=' ', dtype={'names': ('col1', 'col2', 'col3','col4','col5'), 'formats': ('S30', 'f8', 'S1','S30','S30')})
+    VarStat = []
+    VarSelect = ['Time']
+    
+    for k in data:
+        if k[4].astype(str) == 'StatYes':
+            VarStat.append(k[0].astype(str))
+        if k[3].astype(str) == 'MLYes':
+            VarSelect.append(k[0].astype(str))
+            
+    return VarSelect,VarStat

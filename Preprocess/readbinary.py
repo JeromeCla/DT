@@ -152,7 +152,7 @@ def readbinary(DataFileName,index_start, index_end, Nvars):
 #    Nvars = 235
 #    Te   = 0.004
     
-    with open('Variable.txt','r') as fd:
+    with open('Variable2.txt','r') as fd:
         data = np.loadtxt(fd, delimiter=' ', dtype={'names': ('col1', 'col2', 'col3'), 'formats': ('S30', 'f8', 'S1')})
 
     

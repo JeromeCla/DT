@@ -20,29 +20,37 @@
 import pandas as pd
 import numpy as np
 import math
+import scipy.interpolate
 
 
-def LinearAbsCurv(df_AbsCurv):
+def LinearAbsCurv(df_AbsCurv, str_NewName):
     
     # Convert values to float if required
-    AbsCurv = df_AbsCurv.astype(np.float) - df_AbsCurv.astype(np.float).values[0]
+    AbsCurv = df_AbsCurv.astype(np.float)
     
     # Generate linear space for new curve abscissa reference
     EndAbsCurv = math.ceil(max(AbsCurv.values)*10000)/10000 # 0.1um precision
     NbVal = math.ceil(max(AbsCurv.values)*10000) + 1 # number of indexes from given DeltaPos
 
-    return pd.DataFrame(np.linspace(0, EndAbsCurv, NbVal))
+    return pd.DataFrame(np.linspace(0, EndAbsCurv, NbVal), columns=[str_NewName])
 
 
 
-def CurvAbsTranform(df_Variable, df_AbsCurv):
+def CurvAbsTranform(df_Variable, df_AbsCurv, str_NewName, str_RegressionKind):
+    
     # Convert values to float if required
-    AbsCurv = df_AbsCurv.astype(np.float) - df_AbsCurv.astype(np.float).values[0]
+    AbsCurv = df_AbsCurv.astype(np.float)
     # Convert values to float if required
-#    Variable = df_Variable.astype(np.float)
-    # interpolate values    
-    return pd.DataFrame(np.interp(LinearAbsCurv(df_AbsCurv), AbsCurv, df_Variable),columns=[df_Variable.name])
+    Variable = df_Variable.astype(np.float)
+    # interpolate values
+    if str_RegressionKind == 'fast':  
+        return pd.DataFrame(np.interp(LinearAbsCurv(df_AbsCurv, ''), AbsCurv, Variable), columns=[str_NewName])
+    else:
+        Interpolated = scipy.interpolate.interp1d(AbsCurv, Variable, kind=str_RegressionKind)
+        return pd.DataFrame(Interpolated(LinearAbsCurv(df_AbsCurv,'')), columns=[str_NewName])
+#    scipy.interpolate.interpn()
 
+        
 
 
 def CountRewindings(df_AbsCurv):
@@ -65,10 +73,10 @@ def CountRewindings(df_AbsCurv):
     
     return pd.DataFrame(Rewindings,columns = ['Rewindings'])
 
-def getDataAbsCurv(Data):
+def getDataAbsCurv(Data,str_RegressionKind):
     Data_new=pd.DataFrame()
     for k in range (0,len(Data.columns)):
-       Data_new[Data.columns[k]]=CurvAbsTranform(Data[Data.columns[k]],Data['MainGeom_AbsCurTot_mm'])
+       Data_new[Data.columns[k]]=CurvAbsTranform(Data[Data.columns[k]],Data['MainGeom_AbsCurTot_mm'],Data[Data.columns[k]].name,str_RegressionKind)
     Data_new['Rewindings'] = CountRewindings(Data['MainGeom_AbsCurTot_mm'])
 
     return Data_new

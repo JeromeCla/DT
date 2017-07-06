@@ -69,12 +69,12 @@ def DoStatistics(Data,MovingWindow):
     med.rename(columns = dict(zip(cols, 'med_' + cols)), inplace=True)    
     
     # Calculate X standard_deviation from MovingWindow interval into X_Med    
-    stand_dev=med.rolling(MovingWindow).std()
+    stand_dev=Data.rolling(MovingWindow).std()
     cols = stand_dev.columns[:]
     stand_dev.rename(columns = dict(zip(cols, 'std_' + cols)), inplace=True)  
     
     # Calculate X variance from MovingWindow interval into X_Med
-    variance=med.rolling(MovingWindow).var()
+    variance=Data.rolling(MovingWindow).var()
     cols = variance.columns[:]
     variance.rename(columns = dict(zip(cols, 'var_' + cols)), inplace=True)  
       

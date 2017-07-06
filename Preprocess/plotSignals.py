@@ -141,19 +141,30 @@ def plot_statistics(Var,T,X,Y,DoPlotStatistics,filename,AbscCurvRef): # STATISTI
     
     return fig
 
-def plotStrat(data,X,fig_signal):    
+def plotStrat(regime,Data,fig_signal):    
     # Plot the differentes strategies
     
-    strat_intern = data[(data/10000).apply(np.fix)==7].index.values
-    strat_extern = data[(data/10000).apply(np.fix)==8].index.values
-    strat_ebauche = data[(data/10000).apply(np.fix)==5].index.values            
-    strat_arrete_axe = data[(data/10000).apply(np.fix)==6].index.values
+    X = Data['MainGeom_AbsCurTot_mm']
+    strat = Data['Stra_Etat_TableActive']
+    strat_finition= Data['Stra_ModifCROV_Final']
     
+    if regime != '3':
+        strat_intern = strat[(strat/10000).apply(np.fix)==7].index.values
+        strat_extern = strat[(strat/10000).apply(np.fix)==8].index.values
+        strat_ebauche = strat[(strat/10000).apply(np.fix)==5].index.values            
+        strat_arret_axe = strat[(strat/10000).apply(np.fix)==6].index.values    
+    if regime == '3':
+        strat_ebauche = []
+        strat_arret_axe = []
+        strat_intern = strat_finition[strat_finition<1].index.values 
+        strat_extern = strat_finition[strat_finition>1].index.values
+                                          
     bound_intern=np.split(strat_intern, np.where(np.diff(strat_intern) != 1)[0]+1)
     bound_extern=np.split(strat_extern, np.where(np.diff(strat_extern) != 1)[0]+1)
     bound_ebauche=np.split(strat_ebauche, np.where(np.diff(strat_ebauche) != 1)[0]+1)
-    bound_arrete_axe=np.split(strat_arrete_axe, np.where(np.diff(strat_arrete_axe) != 1)[0]+1)
+    bound_arret_axe=np.split(strat_arret_axe, np.where(np.diff(strat_arret_axe) != 1)[0]+1)
         
+    
     for i in range (0,len(fig_signal.get_axes())):  
         if len(bound_intern)>1 :
             for m in range (0,len(bound_intern)):
@@ -164,9 +175,9 @@ def plotStrat(data,X,fig_signal):
         if len(bound_ebauche)>1 :
             for o in range (0,len(bound_ebauche)):
                 fig_signal.get_axes()[i].axvspan(X[min(bound_ebauche[o])],X[max(bound_ebauche[o])], alpha=0.5, color='green',clip_on=False)
-        if len(bound_arrete_axe)>1 :
-            for p in range (0,len(bound_arrete_axe)):
-                fig_signal.get_axes()[i].axvspan(X[min(bound_arrete_axe[p])],X[max(bound_arrete_axe[p])], alpha=0.5, color='cyan',clip_on=False)   
+        if len(bound_arret_axe)>1 :
+            for p in range (0,len(bound_arret_axe)):
+                fig_signal.get_axes()[i].axvspan(X[min(bound_arret_axe[p])],X[max(bound_arret_axe[p])], alpha=0.5, color='cyan',clip_on=False)   
     
     #Legend
     red_patch = mpatches.Patch(color='red', label='intern')
