@@ -14,9 +14,6 @@ import posttreatment as pt
 import datetime
 import time
 
-def tocsv_ML(Data,datadir,filename,writeHeader):
-    with open(datadir + filename[0:-4] + '_ML_nearest.csv', 'a') as f:
-                Data.to_csv(f, header=writeHeader, sep=';', index=False)   
 
 def tocsv(Data, Operation, Regime, parameters, echantillon, target_file, include_header, downsample_window=-1):
 
@@ -56,7 +53,7 @@ def loadcsv(datadir,filename,VarSelect):
 #    return csvdata.apply(pd.to_numeric) 
     return csvdata.astype(np.float)
 
-def createcsv(Dir_input,Dir_Output,BatchList):
+def createcsv(Dir_root,BatchList):
 #    Dir_input = "../0 - Raw Data/"
 #    Dir_Output = "../1 - Preprocessed/"
 
@@ -69,8 +66,9 @@ def createcsv(Dir_input,Dir_Output,BatchList):
     for N in range(0,len(BatchList)):
     
         # set data files names
-        Filename_Input = Dir_input + "_dataint32_" + "%03.0f" % BatchList[N] +  ".bin"
-        
+        Filename_Input = Dir_root + "Usinage" + str(BatchList[N]) + "\\_dataint32_" + "%03.0f" % BatchList[N] +  ".bin"
+        Dir_Output = Dir_root + "Usinage" + str(BatchList[N]) + "\\"
+                                                    
         IndexLength = rb.fileIndexLength(Filename_Input, nb_variables) # process all file
         
         PacketsToProcess = math.ceil(IndexLength/SamplesPacket)

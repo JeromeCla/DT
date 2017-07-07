@@ -64,13 +64,10 @@ def addSignals(regime,Data):
     Data['CurveType'] = Generate_CurveType(regime,Data)
     return Data
 
-def get_signal_stat(Data,Data_stat,VarName):
-# Return the signal of a given signal and all its corresponding statistics
-
-    sel_cols = [col for col in Data_stat.columns if VarName in col]
-    sign=pd.concat([Data[VarName],Data_stat[sel_cols]],axis=1)
-
-    return sign
+def get_signal_stat(Data,VarName):
+    # Return the signal of a given signal and all its corresponding statistics
+    sel_cols = [col for col in Data.columns if VarName in col]
+    return Data[sel_cols]
 
 def get_Variable_to_Save(filename):
     with open(filename,'r') as fd:

@@ -84,7 +84,7 @@ def DoStatistics(Data,MovingWindow):
     min_data.rename(columns = dict(zip(cols, 'min_' + cols)), inplace=True)
     
     # Calculate X maximum from the MovingWindow interval into X_Max
-    max_data=Data.rolling(MovingWindow).min()
+    max_data=Data.rolling(MovingWindow).max()
     cols = max_data.columns[:]
     max_data.rename(columns = dict(zip(cols, 'max_' + cols)), inplace=True)  
     
