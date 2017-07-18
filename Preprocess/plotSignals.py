@@ -104,6 +104,7 @@ def plot_statistics(Var,Data,DoPlotStatistics,DoPlotSpectrogram,echantillon,regi
         ax4.grid(color='#DDDDDD')
         ax4.plot(T,Var['var_'+ Var_name],color='#FF0000', label='Variance [(' + Var_units + ')Â²]')
         ax4.plot(T,Var['std_'+ Var_name],color='#CC00CC', label='Std Deviation [' + Var_units + ']')
+        ax4.plot(T,Var['etp_'+ Var_name],color='#04B404', label='Shannons Entropy [(' + Var_units + ')Â²]')
         ax4.legend(bbox_to_anchor=(1, 0.5), loc=6, title='SCATTERING')
         
         plt.setp(axsig.get_xticklabels(), visible=False)
@@ -113,13 +114,13 @@ def plot_statistics(Var,Data,DoPlotStatistics,DoPlotSpectrogram,echantillon,regi
     
         HdlSel2, = ax2.plot([T[0],T[0]],
                             [ax2.get_ylim()[0],ax2.get_ylim()[1]],
-                            color='#FF0000', alpha=0.5)
+                            color='#FF0000', alpha=0.7)
         HdlSel3, = ax3.plot([T[0],T[0]],
                             [ax3.get_ylim()[0],ax3.get_ylim()[1]],
-                            color='#FF0000', alpha=0.5)
+                            color='#FF0000', alpha=0.7)
         HdlSel4, = ax4.plot([T[0],T[0]],
                             [ax4.get_ylim()[0],ax4.get_ylim()[1]],
-                            color='#FF0000', alpha=0.5)    
+                            color='#FF0000', alpha=0.7)    
         
         axeslist = [axsig,ax2,ax3,ax4]
         

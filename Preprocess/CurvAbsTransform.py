@@ -73,10 +73,17 @@ def CountRewindings(df_AbsCurv):
     
     return pd.DataFrame(Rewindings,columns = ['Rewindings'])
 
-def getDataAbsCurv(Data,str_RegressionKind):
+def getDataAbsCurv(Data,VarInterpLin,VarInterpNearest):
     Data_new=pd.DataFrame()
+    lin = 'fast'
+    nearest = 'nearest'
+    
     for k in range (0,len(Data.columns)):
-       Data_new[Data.columns[k]]=CurvAbsTranform(Data[Data.columns[k]],Data['MainGeom_AbsCurTot_mm'],Data[Data.columns[k]].name,str_RegressionKind)
+        if Data.columns[k] in VarInterpLin:    
+            Data_new[Data.columns[k]]=CurvAbsTranform(Data[Data.columns[k]],Data['MainGeom_AbsCurTot_mm'],Data[Data.columns[k]].name,lin)
+        if Data.columns[k] in VarInterpNearest:    
+            Data_new[Data.columns[k]]=CurvAbsTranform(Data[Data.columns[k]],Data['MainGeom_AbsCurTot_mm'],Data[Data.columns[k]].name,nearest)
+
     Data_new['Rewindings'] = CountRewindings(Data['MainGeom_AbsCurTot_mm'])
 
     return Data_new

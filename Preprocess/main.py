@@ -11,22 +11,22 @@ import createData as cd
 import matplotlib.pyplot as plt
 import plotSignals as ps
 
-plt.close("all")
+#plt.close("all")
 # Select the root directory from where we will reach the data
 # (i.e Variable.txt and binary files)
 Dir_root = "C:\\Users\\i0A103166\\Documents\\Python\\MachineLearning\\"
 
-#Select what actions you wan tot do :
+#Select what actions you want to do :
 PlotAll = True
 saveCSV = False
 loadData = True
 
 #Variable to get the statistics on and window size
-VarStatPlot = 'Main_USA'
-VarStat=[VarStatPlot, 'dt_'+VarStatPlot,'dt2_'+VarStatPlot,'max_'+VarStatPlot,'min_'+VarStatPlot,'std_'+VarStatPlot,'med_'+VarStatPlot,'var_'+VarStatPlot]
+VarStatPlot = 'TkEd_PI17_txtd'
+VarStat=[VarStatPlot, 'dt_'+VarStatPlot,'dt2_'+VarStatPlot,'max_'+VarStatPlot,'min_'+VarStatPlot,'std_'+VarStatPlot,'med_'+VarStatPlot,'var_'+VarStatPlot,'etp_'+VarStatPlot]
 
-VarSelect = ['Time','Main_USA','MainGeom_AbsCurTot_mm','Main_PressionStr','Main_PressionMesSup','Rewindings','CurveType','TkEd_pCM_Regle_X','TkEd_pCM_Regle_Y']
-VarPlot = ['Main_USA','MainGeom_AbsCurTot_mm','Main_PressionStr','Main_PressionMesSup','Rewindings']
+VarSelect = ['Time','Main_USA','MainGeom_AbsCurTot_mm','Main_PressionMesSup','Main_PressionMesInf','Rewindings','CurveType','TkEd_pCM_Regle_X','TkEd_pCM_Regle_Y']
+VarPlot = ['Main_USA','Main_PressionMesSup','Main_PressionMesInf','Rewindings']
 
 WindowSize = 150
 
@@ -43,5 +43,3 @@ for i in range (0,len(regime)):
         Data = cd.loadDataML(Dir_root,echantillon[0],regime[i],VarSelect+VarStat)
     if PlotAll==True:
         ps.plotAll(Data,VarPlot,VarStat,echantillon,regime[i],refAbsCurv=True)
-    
-       

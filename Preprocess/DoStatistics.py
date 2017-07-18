@@ -9,57 +9,35 @@
 # +GF+ Machining Solutions, B.Lavazais 2017-06
 #------------------------------------------------------------------------------
 
-import sys
+
 import pandas as pd
-import statistics
-import matplotlib.pyplot as plt
-from matplotlib import gridspec
-import CurvAbsTransform as cat
+import scipy
+import scipy.stats
 #==============================================================================
 # Initializations
 #==============================================================================
 
 
-#VarSelect = 140 # td for pass 3
-VarSelect = 174
-VarXPos = 'TkEd_pCM_Regle_X'
-VarYPos = 'TkEd_pCM_Regle_Y'
-
-MovingWindow = 15  # number of samples for moving calculation
-
-
-#if DoReloadFile:
-#    # init data
-#    X = pd.DataFrame() # Import raw data of selected variable (VarSelect) into X
-#    XPos = pd.DataFrame() # X-axis positions
-#    YPos = pd.DataFrame() # Y-axis positions
-#    T = pd.DataFrame() # relatve time of samples
-#    dT = pd.DataFrame() # delta time of samples
-#    Path = pd.DataFrame() # cutting length path
-#    # init statistics data
-#    X_Vel = pd.DataFrame()
-#    X_Acc = pd.DataFrame()
-#    X_Med = pd.DataFrame()
-#    X_SDev = pd.DataFrame()
-#    X_Var = pd.DataFrame()
-#    #X_Hrm = pd.DataFrame()
-#    X_Min = pd.DataFrame()
-#    X_Max = pd.DataFrame()
-
-
-def DoStatistics(Data,MovingWindow):
+def DoStatistics(Time,Data,MovingWindow):
 
 
     # CALUCULATE STATISTICS
     print('Process statistical signals... ', end='')
+    dTime = Time.diff()
+
+    Data_stat = pd.DataFrame()
     
     # Calculate Velocity = X first derivative into X_Vel
-    dt = Data.diff()
+    dt = pd.DataFrame()
+    for k in Data.columns.values:
+        dt[k] = Data[k].diff().div(dTime)
     cols = dt.columns[:]
     dt.rename(columns = dict(zip(cols, 'dt_' + cols)), inplace=True)       
     
     # Calculate Acceleration = X second derivative into X_Acc (=X_Vel first derivative)    
-    dt2 = (Data.diff()).diff()
+    dt2 = pd.DataFrame()
+    for k in Data.columns.values:
+        dt2[k] = (Data[k].diff().div(dTime)).diff().div(dTime)
     cols = dt2.columns[:]
     dt2.rename(columns = dict(zip(cols, 'dt2_' + cols)), inplace=True)    
     
@@ -87,10 +65,14 @@ def DoStatistics(Data,MovingWindow):
     max_data=Data.rolling(MovingWindow).max()
     cols = max_data.columns[:]
     max_data.rename(columns = dict(zip(cols, 'max_' + cols)), inplace=True)  
-    
 
+
+    # Calculate moving Shannon's Entropy
+    entropy = Data.rolling(window=MovingWindow, center=False).apply(scipy.stats.entropy)
+    cols = entropy.columns[:]
+    entropy.rename(columns = dict(zip(cols, 'etp_' + cols)), inplace=True) 
     
-    Data_stat = pd.concat([dt,dt2,med,stand_dev,variance,min_data,max_data ],axis=1)
+    Data_stat = pd.concat([dt,dt2,med,stand_dev,variance,min_data,max_data,entropy ],axis=1)
     
     print('Done !')
     

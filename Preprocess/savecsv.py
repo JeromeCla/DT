@@ -17,10 +17,10 @@ import time
 
 def tocsv(Data, Operation, Regime, parameters, echantillon, target_file, include_header, downsample_window=-1):
 
-    Data=np.insert(Data,1,Operation,axis=0)
+    Data=np.insert(Data,0,Operation,axis=0)
     
     parameters=np.insert(parameters,0,'Operation')
-    parameters=np.insert(parameters,0,'Time')
+    parameters=np.insert(parameters,1,'Time')
 
     datatosave = np.concatenate((np.transpose(Data),np.transpose(Regime)),axis=1)
     df_datatosave = pd.DataFrame(datatosave, columns = parameters)

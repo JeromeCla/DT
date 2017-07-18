@@ -60,7 +60,7 @@ def Generate_CurveType(regime,Data):
 
 def addSignals(regime,Data):
     # We set the start time at zero
-    Data['Time'] = Data['Time']- Data['Time'][0]
+    Data['Time'] = Data['Time'] - Data['Time'][0]
     Data['CurveType'] = Generate_CurveType(regime,Data)
     return Data
 
@@ -71,14 +71,20 @@ def get_signal_stat(Data,VarName):
 
 def get_Variable_to_Save(filename):
     with open(filename,'r') as fd:
-        data = np.loadtxt(fd, delimiter=' ', dtype={'names': ('col1', 'col2', 'col3','col4','col5'), 'formats': ('S30', 'f8', 'S1','S30','S30')})
+        data = np.loadtxt(fd, delimiter=' ', dtype={'names': ('col1', 'col2', 'col3','col4','col5','col6'), 'formats': ('S30', 'f8', 'S1','S30','S30','S30')})
     VarStat = []
     VarSelect = ['Time']
+    VarInterpLin = ['Time']
+    VarInterpNearest = []
     
     for k in data:
         if k[4].astype(str) == 'StatYes':
             VarStat.append(k[0].astype(str))
         if k[3].astype(str) == 'MLYes':
             VarSelect.append(k[0].astype(str))
-            
-    return VarSelect,VarStat
+            if k[5].astype(str) == 'Interplin':
+                VarInterpLin.append(k[0].astype(str))
+            if k[5].astype(str) == 'Interpnearest':
+                VarInterpNearest.append(k[0].astype(str))
+
+    return VarSelect,VarStat,VarInterpLin,VarInterpNearest
