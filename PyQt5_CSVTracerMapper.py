@@ -98,11 +98,11 @@ class MainUI(Qtw.QDialog):
         self.cb3List.activated[str].connect(self.onSelSignal)
         dflayout.addWidget(self.cb3List,3)
         
-#        self.ckAbsMode = Qtw.QCheckBox('Curve Abscissa Mode')
-#        self.ckAbsMode.setFont(Qtg.QFont('SansSerif', 10))
-#        self.ckAbsMode.toggled.connect(self.onAbsModeChange)
-#        self.ckAbsMode.setChecked(False)
-#        dflayout.addWidget(self.ckAbsMode,1)
+        self.ckAbsMode = Qtw.QCheckBox('Curve Abscissa Mode')
+        self.ckAbsMode.setFont(Qtg.QFont('SansSerif', 10))
+        self.ckAbsMode.toggled.connect(self.onAbsModeChange)
+        self.ckAbsMode.setChecked(False)
+        dflayout.addWidget(self.ckAbsMode,1)
         
         self.button1 = Qtw.QPushButton('Reload Data')
         self.button1.setFont(Qtg.QFont('SansSerif', 10, weight=Qtg.QFont.Bold))
@@ -227,8 +227,8 @@ class MainUI(Qtw.QDialog):
                 else:
                     self.canvas.redraw()
         
-#    def onAbsModeChange(self):
-#        self.canvas.AbsCurvMode = self.ckAbsMode.isChecked()
+    def onAbsModeChange(self):
+        self.canvas.AbsCurvMode = self.ckAbsMode.isChecked()
 
     def loadFilesList(self):
         os.chdir(self.Datadir)
@@ -305,7 +305,9 @@ class MainUI(Qtw.QDialog):
             
             # cacluate relative and delta times
             self.canvas.Raw['RelTime'] = self.canvas.Raw['Time'].sub(self.canvas.Raw['Time'][0])
-            self.canvas.Raw['dTime'] = self.canvas.Raw['Time'].sub(self.canvas.Raw['Time'].shift(1)).fillna(0)
+#            self.canvas.Raw['dTime'] = self.canvas.Raw['Time'].sub(self.canvas.Raw['Time'].shift(1)).fillna(0)
+            self.canvas.Raw['dTime'] = self.canvas.Raw['Time'].diff()
+
             print('Done !')
             
             # display information on data imported

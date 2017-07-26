@@ -10,6 +10,7 @@ because of parameters # 21, 23, 24 that are not taken into account in this code
 import createData as cd
 import matplotlib.pyplot as plt
 import plotSignals as ps
+import savecsv as sc
 
 #plt.close("all")
 # Select the root directory from where we will reach the data
@@ -28,15 +29,17 @@ VarStat=[VarStatPlot, 'dt_'+VarStatPlot,'dt2_'+VarStatPlot,'max_'+VarStatPlot,'m
 VarSelect = ['Time','Main_USA','MainGeom_AbsCurTot_mm','Main_PressionMesSup','Main_PressionMesInf','Rewindings','CurveType','TkEd_pCM_Regle_X','TkEd_pCM_Regle_Y']
 VarPlot = ['Main_USA','Main_PressionMesSup','Main_PressionMesInf','Rewindings']
 
-WindowSize = 150
+WindowSize = 125
 
 # Echantillon and regime to analyze. Specify only one echantillon for plotting 
 # (multiple are only allowed for saving file)
 echantillon = [int(x) for x in (input("Enter the echantillon separate by space : " ).split())]
 regime = [int(x) for x in (input("Enter the regime separate by space : " ).split())]
 
+#sc.createcsv(Dir_root,echantillon)
+
 if saveCSV == True:
-    cd.createDataML(Dir_root,echantillon,regime,WindowSize, newRawData=False)
+    cd.createDataML(Dir_root,echantillon,regime,WindowSize)
         
 for i in range (0,len(regime)):    
     if loadData == True:
