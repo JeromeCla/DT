@@ -11,6 +11,10 @@ from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationTo
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from matplotlib import mlab
+import matplotlib.patches as mpatches
+import sys
+sys.path.insert(0, 'Preprocess')
+import posttreatment as pt
 
 class MainUI(Qtw.QDialog):
  
@@ -141,6 +145,11 @@ class MainUI(Qtw.QDialog):
         self.btReload.setStyleSheet('background-color: #00FF88')
         self.btReload.clicked.connect(self.onReloadData)
         self.btReload.setHidden(True)
+        
+        self.btStrat = Qtw.QCheckBox('Show Strategies')
+        self.btStrat.setFont(Qtg.QFont('SansSerif', 10, weight=Qtg.QFont.Bold))
+        self.btStrat.toggled.connect(self.onShowStrat)
+        dflayout.addWidget(self.btStrat,1)
         
         dflayout.addWidget(self.btReload,2)
         
@@ -289,6 +298,14 @@ class MainUI(Qtw.QDialog):
                 else: # direct signals mode
                     self.canvas.redraw()
                     self.canvas.setFocus()
+    
+    def onShowStrat(self):
+        if self.btStrat.isChecked():
+            self.canvas.PlotStrat = 1
+            self.canvas.redraw()
+        else: 
+            self.canvas.PlotStrat = 0
+            self.canvas.redraw()
         
 #    def onAbsModeChange(self):
 #        self.canvas.AbsCurvMode = self.ckAbsMode.isChecked()
@@ -411,7 +428,7 @@ class MainUI(Qtw.QDialog):
             self.btReload.setHidden(False)
         self.Var1 = self.cb2List.currentText()
         self.Var2 = self.cb3List.currentText()
-        
+  
     def onSelOperator(self, text):
         if self.canvas.dataLoaded:
             self.canvas.message = 'operator changed, please click on \"Reload Data\" to refresh...'
@@ -461,6 +478,8 @@ class MainUI(Qtw.QDialog):
 
             if self.Var2 != '(no signal)':
                 VarList += [self.Var2]
+                
+            VarList += ['Stra_Etat_TableActive','Stra_ModifCROV_Final','Operation']
 
             ### Load data from CSV
             filepath = self.Datadir + self.Filename
@@ -486,6 +505,29 @@ class MainUI(Qtw.QDialog):
             if self.canvas.AbsAvailable: self.canvas.Raw['AbsCurv'] = csvdata[self.VarAbs].astype(np.float)
             
             self.canvas.Raw['Values1'] = csvdata[self.Var1].astype(np.float)
+            data = pd.DataFrame()
+            data['Stra_Etat_TableActive']=csvdata['Stra_Etat_TableActive'].astype(np.float)
+            data['Stra_ModifCROV_Final']=csvdata['Stra_ModifCROV_Final'].astype(np.float)
+            
+            self.canvas.Raw['Strat'] = pt.Generate_CurveType(csvdata.iloc[-1]['Operation'],data) 
+            # Plot the differentes strategies
+            strat = self.canvas.Raw['Strat']    
+            strat_intern = strat[(strat).apply(np.fix)==7].index.values
+            strat_extern = strat[(strat).apply(np.fix)==8].index.values
+            strat_ebauche = strat[(strat).apply(np.fix)==5].index.values            
+            strat_arret_axe = strat[(strat).apply(np.fix)==6].index.values    
+            
+                                      
+            bound_intern=np.split(strat_intern, np.where(np.diff(strat_intern) != 1)[0]+1)
+            self.canvas.intern=bound_intern
+            bound_extern=np.split(strat_extern, np.where(np.diff(strat_extern) != 1)[0]+1)
+            self.canvas.extern=bound_extern
+            bound_ebauche=np.split(strat_ebauche, np.where(np.diff(strat_ebauche) != 1)[0]+1)
+            self.canvas.ebauche=bound_ebauche
+            bound_arret_axe=np.split(strat_arret_axe, np.where(np.diff(strat_arret_axe) != 1)[0]+1)  
+            self.canvas.arret_axe=bound_arret_axe
+
+                
             
             if self.Var2 != '(no signal)':
                 self.canvas.Raw['Values2'] = csvdata[self.Var2].astype(np.float)
@@ -675,6 +717,10 @@ class PlotCanvas(FigureCanvas):
         self.Raw = pd.DataFrame()
         self.Stats = pd.DataFrame()
         self.Synch = pd.DataFrame()
+        self.intern = []
+        self.extern = []
+        self.arret_axe = []
+        self.ebauche = []
         
         self.Var1_name = ''
         self.Var2_name = ''
@@ -690,6 +736,7 @@ class PlotCanvas(FigureCanvas):
         self.HdlMessage = None
         self.filename = ''
         self.PlotMode = 0
+        self.PlotStrat = 0
         self.AbsCurvMode = False
         self.dataLoaded = False
         self.iNearest = 0
@@ -727,8 +774,8 @@ class PlotCanvas(FigureCanvas):
         if self.AbsCurvMode and self.AbsAvailable:
             self.PlotsX = self.Raw['AbsCurv']
         else:
-            self.PlotsX = self.Raw['RelTime']
-
+            self.PlotsX = self.Raw['RelTime']       
+        
         if self.PlotMode == 1 and self.Stats.empty == False : # STATISTICAL VIEW
 
             #Check if position have to be plotted
@@ -954,9 +1001,42 @@ class PlotCanvas(FigureCanvas):
                                               self.Raw['YPos'][self.iNearest],
                                               marker="o", color='#FF0000', alpha=0.5)
             
+        if self.PlotStrat == 1:  
+            self.onStrat()        
+            
         self.draw()
         
-           
+    def onStrat(self):
+        
+        bound_intern=self.intern
+        bound_extern=self.extern
+        bound_ebauche=self.ebauche
+        bound_arret_axe=self.arret_axe
+        axes = self.fig.get_axes()[0:-1]
+        
+        for i in range (0,len(axes)):
+            if len(bound_intern)>1 :
+                for m in range (0,len(bound_intern)):
+                    axes[i].axvspan(self.PlotsX[min(bound_intern[m])],self.PlotsX[max(bound_intern[m])], alpha=0.5, color='yellow',clip_on=True)
+            if len(bound_extern)>1 :        
+                for n in range (0,len(bound_extern)):
+                    axes[i].axvspan(self.PlotsX[min(bound_extern[n])],self.PlotsX[max(bound_extern[n])], alpha=0.5, color='blue',clip_on=True)                 
+            if len(bound_ebauche)>1 :
+                for o in range (0,len(bound_ebauche)):
+                    axes[i].axvspan(self.PlotsX[min(bound_ebauche[o])],self.PlotsX[max(bound_ebauche[o])], alpha=0.5, color='green',clip_on=True)
+            if len(bound_arret_axe)>1 :
+                for p in range (0,len(bound_arret_axe)):
+                    axes[i].axvspan(self.PlotsX[min(bound_arret_axe[p])],self.PlotsX[max(bound_arret_axe[p])], alpha=0.5, color='cyan',clip_on=True)   
+       
+        #Legend
+        yellow_patch = mpatches.Patch(color='yellow', label='intern')
+        blue_patch = mpatches.Patch(color='blue', label='extern')
+        green_patch = mpatches.Patch(color='green', label='ebauche')
+        cyan_patch = mpatches.Patch(color='cyan', label='arret axe')
+        self.axsig.legend(handles=[yellow_patch,blue_patch,green_patch,cyan_patch], labels=('intern','extern','ebauche','arret axe',))
+
+        
+                    
     def rezoomPositions(self):
         # get current zoom limits from signal trace
         Tmin, Tmax = np.clip(self.axsig.get_xlim(), self.PlotsX.min(), self.PlotsX.max())
@@ -984,7 +1064,8 @@ class PlotCanvas(FigureCanvas):
         # zoom positions
         self.axpos.set_xlim(bXmin, bXmax)
         self.axpos.set_ylim(bYmin, bYmax)
-    
+               
+
     def drawCursors(self):      
         if self.AbsAvailable: nabs = self.Raw['AbsCurv'][self.iNearest]
         if self.PosAvailable: 
